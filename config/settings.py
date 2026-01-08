@@ -2,21 +2,25 @@
 Django settings for Colisso project - MODULE 1
 """
 
-from pathlib import Path
+import os
+import dj_database_url
 from decouple import config
-from datetime import timedelta
+from pathlib import Path  
+from datetime import timedelta 
 
-# Build paths
-BASE_DIR = Path(__file__).resolve().parent.parent
+# Build paths inside the project
+BASE_DIR = Path(__file__).resolve().parent.parent  # ← AJOUTER
 
-# Security
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
-DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config(
-    'ALLOWED_HOSTS', 
-    default='localhost,127.0.0.1,10.0.2.2',  # Ajoute 10.0.2.2 ici
-    cast=lambda v: [s.strip() for s in v.split(',')]
-)
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here-change-me')
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS.append('.onrender.com')  # Pour Render
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -48,6 +52,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,13 +82,47 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# DATABASE - Auto-detection
+DATABASE_URL = config('DATABASE_URL', default=None)
+
+if DATABASE_URL:
+    # Production ou PostgreSQL local
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+        )
     }
-}
+else:
+    # Développement avec SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# CACHES - Auto-détection
+REDIS_URL = config('REDIS_URL', default=None)
+
+if REDIS_URL:
+    # Production avec Redis
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
+else:
+    # Développement sans Redis
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -100,8 +139,9 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
