@@ -4,8 +4,16 @@ djangorestframework==3.14.0
 django-cors-headers==4.3.1
 python-decouple==3.8
 
-# Authentication JWT
-djangorestframework-simplejwt==5.3.1  # ← AJOUTER ICI
+# Authentication
+djangorestframework-simplejwt==5.3.1
+PyJWT==2.8.0
+
+# API Documentation
+drf-spectacular==0.27.0
+uritemplate==4.1.1
+PyYAML==6.0.1
+inflection==0.5.1
+jsonschema==4.20.0
 
 # Base de données
 psycopg2-binary==2.9.9
@@ -14,10 +22,25 @@ dj-database-url==2.1.0
 # Redis
 redis==5.0.1
 django-redis==5.4.0
+hiredis==2.3.2
 
 # Serveur WSGI
 gunicorn==21.2.0
+
+# Static files
 whitenoise==6.6.0
 
-# Autres
+# Outils
 django-filter==23.5
+python-dateutil==2.8.2
+pytz==2024.1
+
+# Images (si nécessaire)
+# Pillow==10.3.0
+
+# Requests (souvent nécessaire)
+requests==2.31.0
+certifi==2024.2.2
+charset-normalizer==3.3.2
+idna==3.6
+urllib3==2.2.0
