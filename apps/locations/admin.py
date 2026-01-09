@@ -1,44 +1,41 @@
-"""
-Locations admin
-"""
 from django.contrib import admin
-from .models import Pays, Ville, Quartier, Gare
-
-
-@admin.register(Pays)
-class PaysAdmin(admin.ModelAdmin):
-    list_display = ['nom', 'code', 'indicatif', 'is_active', 'created_at']
-    list_filter = ['is_active']
-    search_fields = ['nom', 'code']
-    ordering = ['nom']
-
+from .models import Ville, Gare
 
 @admin.register(Ville)
 class VilleAdmin(admin.ModelAdmin):
-    list_display = ['nom', 'pays', 'population', 'is_active', 'created_at']
-    list_filter = ['pays', 'is_active']
-    search_fields = ['nom']
+    list_display = ['nom', 'code_postal', 'get_gares_count', 'created_at']
+    search_fields = ['nom', 'code_postal']
+    list_filter = ['created_at']
     ordering = ['nom']
-    autocomplete_fields = ['pays']
-
-
-@admin.register(Quartier)
-class QuartierAdmin(admin.ModelAdmin):
-    list_display = ['nom', 'ville', 'is_active', 'created_at']
-    list_filter = ['ville__pays', 'ville', 'is_active']
-    search_fields = ['nom', 'ville__nom']
-    ordering = ['nom']
-    autocomplete_fields = ['ville']
-
+    
+    def get_gares_count(self, obj):
+        count = obj.gares.count()
+        return f'{count} gare(s)'
+    get_gares_count.short_description = 'Nombre de gares'
 
 @admin.register(Gare)
 class GareAdmin(admin.ModelAdmin):
-    list_display = ['nom', 'quartier', 'ville_display', 'telephone', 'is_active', 'created_at']
-    list_filter = ['quartier__ville__pays', 'quartier__ville', 'is_active']
-    search_fields = ['nom', 'adresse', 'quartier__nom']
-    ordering = ['nom']
-    autocomplete_fields = ['quartier']
+    list_display = ['nom', 'ville', 'adresse', 'get_status', 'created_at']
+    list_filter = ['ville', 'created_at']
+    search_fields = ['nom', 'adresse', 'ville__nom']
+    autocomplete_fields = ['ville']
     
-    def ville_display(self, obj):
-        return obj.quartier.ville.nom
-    ville_display.short_description = 'Ville'
+    fieldsets = (
+        ('🏢 Informations générales', {
+            'fields': ('nom', 'ville', 'adresse')
+        }),
+        ('📞 Contact', {
+            'fields': ('telephone', 'email')
+        }),
+        ('📅 Dates', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    readonly_fields = ['created_at', 'updated_at']
+    
+    def get_status(self, obj):
+        return '<span class="badge badge-success">Active</span>'
+    get_status.short_description = 'Statut'
+    get_status.allow_tags = True

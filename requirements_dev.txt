@@ -1,0 +1,19 @@
+# Django Core
+Django==4.2.8
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+python-decouple==3.8
+
+# Base de données - PAS de psycopg2 en dev
+dj-database-url==2.1.0
+
+# Redis (optionnel en dev)
+# redis==5.0.1
+# django-redis==5.4.0
+
+# Serveur (pas nécessaire en dev)
+# gunicorn==21.2.0
+whitenoise==6.6.0
+
+# Autres
+django-filter==23.5
