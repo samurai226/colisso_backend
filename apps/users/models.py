@@ -81,6 +81,11 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     )
     nom = models.CharField(max_length=100, verbose_name="Nom")
     prenom = models.CharField(max_length=100, verbose_name="Prénom")
+    email = models.EmailField(  # ← AJOUTÉ
+        blank=True,
+        null=True,
+        verbose_name="Email"
+    )
     role = models.ForeignKey(
         Role,
         on_delete=models.PROTECT,
